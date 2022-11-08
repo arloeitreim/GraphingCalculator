@@ -13,11 +13,16 @@ import java.awt.Color;
 import java.awt.Font;
 import java.lang.Math;
 import java.util.*;
+import javax.swing.SwingUtilities;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.font.TextAttribute;
+import java.text.AttributedString;
 
 public class GUI {
 
    private String count;
-  // private double count;
    private JLabel label;
    private JFrame frame;
    private JPanel buttonPanel, labelPanel;
@@ -28,6 +33,7 @@ public class GUI {
                    leftParenthesis, equals, clear;
    
    public GUI() {
+   
       count = "";
       frame = new JFrame();
       
@@ -52,11 +58,11 @@ public class GUI {
       equals = new JButton();
       clear = new JButton("C");
       
-      label = new JLabel("equals: 0", JLabel.LEFT);
+      label = new JLabel("= ", JLabel.LEFT);
       label.setPreferredSize(new Dimension(220, 15));
       label.setForeground(new Color(220,  209, 255));
       label.setBackground(new Color(120, 90, 40));
-      label.setFont(new Font("Verdana", Font.PLAIN, 12));
+      label.setFont(new Font("Verdana", Font.PLAIN, 15));
       label.setVerticalAlignment(JLabel.BOTTOM);
    
       buttonPanel = new JPanel();
@@ -85,7 +91,6 @@ public class GUI {
       buttonPanel.add(equals);
       buttonPanel.add(clear);
       labelPanel.add(label);
-      
    
       frame.add( buttonPanel, BorderLayout.CENTER );
       frame.add( labelPanel, BorderLayout.SOUTH);
@@ -97,36 +102,77 @@ public class GUI {
       frame.pack();
       frame.setVisible(true);
       
-      MouseListener hover = new MouseAdapter() {
-         public void mouseEntered(MouseEvent e) {
-            equals.setIcon(new ImageIcon(getClass().getResource("EqualsLavender.png ")));
-         }
-         public void mouseExited(MouseEvent e) {
-            equals.setIcon(new ImageIcon(getClass().getResource("Equals.png ")));
-         }
-
-      };
+      MouseListener hover = 
+         new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+               equals.setIcon(new ImageIcon(getClass().getResource("EqualsLavender.png ")));
+            }
+            public void mouseExited(MouseEvent e) {
+               equals.setIcon(new ImageIcon(getClass().getResource("Equals.png ")));
+            }
+         
+         };
       
-      ActionListener number = new ActionListener() {
+      ActionListener number = 
+         new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                identifyNumber(e);
-               label.setText("equals: " + count );
+               label.setText("= " + count );
             }
          };
       
-      ActionListener operator = new ActionListener() {
+      ActionListener operator = 
+         new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                try {
+                  int index;
                   identifyOperator(e);
-                  count.replace("  ", " ");
-                  label.setText("equals: " + count );
-               }
+                  String html = count + "<html>";
+                  count.replaceAll("  ", " ");
+                  html.replaceAll("  ", " ");
+                  while (html.contains("^")) {
+                     index = html.indexOf("^");
+                     html = html.replace(html.charAt(index - 2) + " ^ " + count.charAt(index + 2), count.charAt(index - 2) + "<sup>" + count.charAt(index + 2) + "</sup>");
+                  }
+                  label.setText("<html>= " + html );
+               } 
                catch (NumberFormatException ae) {
                   label.setText("Invalid");
                   count = "";
                }
             }
          };
+      ActionListener exponentAndLogarithm = 
+         new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               try {
+                  count += " ^ ";
+                  count.replaceAll("  ", " ");
+                  label.setText("= " + count );
+               } 
+               catch (NumberFormatException ae) {
+                  label.setText("Invalid");
+                  count = "";
+               }
+            }
+         };
+      ActionListener equalsListener = 
+         new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               Calculations Calculator = new Calculations(count); 
+               count = Calculator.count;
+               try {
+                  if ((double)(int)Double.parseDouble(count) == Double.parseDouble(count)) {
+                     count = (int)Double.parseDouble(count) + "";
+                  } 
+                  label.setText("= " + count );
+               }
+               catch (NumberFormatException a) {
+                  label.setText("= " + count );
+               }
+            }
+         };
+   
       
       zero.addActionListener(number);
       one.addActionListener(number);
@@ -143,13 +189,12 @@ public class GUI {
       divide.addActionListener(operator);
       add.addActionListener(operator);
       subtract.addActionListener(operator);
-      exponent.addActionListener(operator);
+      exponent.addActionListener(exponentAndLogarithm);
       leftParenthesis.addActionListener(operator);
       rightParenthesis.addActionListener(operator);
-      equals.addActionListener(operator);
+      equals.addActionListener(equalsListener);
       equals.addMouseListener(hover);
       clear.addActionListener(operator);
-      
       
       equals.setSize(52, 26);
       System.out.println(equals.getWidth());
@@ -163,10 +208,7 @@ public class GUI {
    
    public void identifyOperator(ActionEvent e) {
    
-      if (e.getSource() == equals) {
-         count = equals(count);
-      }
-      else if (e.getSource() == leftParenthesis) {
+      if (e.getSource() == leftParenthesis) {
          count += " ( ";
       }
       
@@ -186,9 +228,6 @@ public class GUI {
       }
       else if (e.getSource() == subtract) {
          count += " - ";
-      }
-      else if (e.getSource() == exponent) {
-         count += " ^ ";
       }
       else if (e.getSource() == clear) {
          count = "";
@@ -230,67 +269,5 @@ public class GUI {
       else if (e.getSource() == decimal) {
          count += ".";
       }
-   }
-   public String equals(String count) {
-   count = count.replace("  ", " ");
-   int startingPlace = 0;
-   int endingPlace = 0;
-   String inParentheses;
-   int contains = 0;
-      if (count.contains(" ( ") || count.contains(" ) ")) {
-         for (int i = 0; i < count.length(); i++) {
-            if (count.charAt(i) == ')' || count.charAt(i) == '(') {
-               contains++;
-            }
-         }
-         for (int i = 0; i < contains/2; i++) {
-            startingPlace = count.indexOf("(");
-            endingPlace = count.indexOf(")");
-            if (count.substring(startingPlace + 2, endingPlace).contains(" ( ")) {
-               
-            inParentheses = equals(count.substring(startingPlace + 2, endingPlace));
-            count = count.substring(0, startingPlace - 1) + " " + inParentheses + " " + count.substring(endingPlace + 2);
-            }    
-         }
-      }
-         String[] s = count.split(" ", -2); // Count, split into an array of Strings
-                                         // split based on whitespace
-                                         
-         //while (count.contains("^")) {
-            
-     
-      double finalCount = Double.parseDouble(s[0]);
-      for (int i = 1; i <= s.length - 1; i++) {
-         switch (s[i]) {
-            case "*": i++; finalCount = finalCount*Double.parseDouble(s[i]);
-               break;
-            case "/": i++; finalCount = finalCount/Double.parseDouble(s[i]);
-               break;
-            case "+": i++; finalCount += Double.parseDouble(s[i]);
-               break;
-            case "-": i++; finalCount -= Double.parseDouble(s[i]);
-               break;
-            case "^": i++; finalCount = Math.pow(finalCount, Double.parseDouble(s[i]));
-               break;
-         }  
-      }
-      if ((double)(int)finalCount == finalCount) {
-         return (int)finalCount + "";
-      }
-      else { 
-         return finalCount + "";
-      }
-   }
-   
-   public static Integer tryParse(String text) {
-   
-      try {
-         return Integer.parseInt(text);
-      }
-      
-      catch (NumberFormatException e) {
-         return null;
-      }
-      
    }
 }
