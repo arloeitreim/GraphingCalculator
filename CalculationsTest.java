@@ -1,10 +1,12 @@
 import java.lang.Math;
+import java.util.*;
+
 
 public class CalculationsTest {
 
    String count;
    
-   public CalculationsTest(String count) {
+  public CalculationsTest(String count) {
       this.count = count;
       while (1 == 1) {
          try {
@@ -20,7 +22,7 @@ public class CalculationsTest {
    }
    
    public static void main(String []args) {
-      new CalculationsTest("2 - 3 ^ ( 2 / 4 * ( 2 ^ 3 ) * ( 2 * ( 10 / 3 ) ) ) * ( 4 - 3 )");
+      new CalculationsTest("2 ^ 4");
    }
   
    public String equals(String subCount) {

@@ -24,7 +24,7 @@ public class Calculations {
       if (subCount.contains("(") || subCount.contains(")")) {
          subCount = parentheses(subCount);
       }
-      else if (subCount.contains("^")) {
+      else if (subCount.contains("<sup>")) {
          subCount = exponents(subCount);
       } 
       else if (subCount.contains("*") || subCount.contains("/")) {
@@ -39,6 +39,7 @@ public class Calculations {
    }
      
    public String parentheses(String subCount) {
+   subCount = subCount.replaceAll("  ", " ");
       int last = 0;
       for (int i = 0; i < subCount.indexOf(")"); i++) {
          if (subCount.charAt(i) == '(' ) {
@@ -51,12 +52,14 @@ public class Calculations {
    } 
       
    public String exponents(String subCount) {
+      subCount = subCount.replaceAll("  ", " ");
       String[] s1 = subCount.split(" ");
       double sum = 0;
       for (int i = 0; i < s1.length; i++) {
-         if (s1[i].contains("^")) {
+         if (s1[i].contains("<sup>")) {
+            
             sum = Math.pow(Double.parseDouble(s1[i-1]), Double.parseDouble(s1[i+1]));
-            subCount = subCount.replace(s1[i-1] + " ^ " + s1[i+1], sum + "");
+            subCount = subCount.replace(s1[i-1] + " <sup> " + s1[i+1] + " </sup> ", sum + "");
             s1 = subCount.split(" ");
             i--;
          }
@@ -65,6 +68,7 @@ public class Calculations {
    }
 
    public String multiplicationAndDivision(String subCount) {
+   subCount = subCount.replaceAll("  ", " ");
       String[] s1 = subCount.split(" ");
       double sum = 0;
       for (int i = 0; i < s1.length; i++) {
@@ -85,6 +89,7 @@ public class Calculations {
    }
 
    public String additionAndSubtraction(String subCount) {
+   subCount = subCount.replaceAll("  ", " ");
       String[] s1 = subCount.split(" ");
       double sum = 0;
       for (int i = 0; i < s1.length; i++) {

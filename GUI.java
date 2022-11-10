@@ -59,7 +59,7 @@ public class GUI {
       clear = new JButton("C");
       
       label = new JLabel("= ", JLabel.LEFT);
-      label.setPreferredSize(new Dimension(220, 15));
+      label.setPreferredSize(new Dimension(220, 30));
       label.setForeground(new Color(220,  209, 255));
       label.setBackground(new Color(120, 90, 40));
       label.setFont(new Font("Verdana", Font.PLAIN, 15));
@@ -116,8 +116,17 @@ public class GUI {
       ActionListener number = 
          new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               identifyNumber(e);
-               label.setText("= " + count );
+                 if (count.contains("_")) {
+                     String s = identifyNumber(e);
+                     char c = s.charAt(0);
+                     count = count.replace('_', c);
+                     label.setText("<html>= " + count + "<html>");
+                  }
+                  else {
+                  count += identifyNumber(e);
+                  label.setText("<html>= " + count + "<html>");
+                  count.replaceAll("  ", " ");
+                  }
             }
          };
       
@@ -125,37 +134,17 @@ public class GUI {
          new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                try {
-                  int index;
                   identifyOperator(e);
-                  String html = count + "<html>";
-                  count.replaceAll("  ", " ");
-                  html.replaceAll("  ", " ");
-                  while (html.contains("^")) {
-                     index = html.indexOf("^");
-                     html = html.replace(html.charAt(index - 2) + " ^ " + count.charAt(index + 2), count.charAt(index - 2) + "<sup>" + count.charAt(index + 2) + "</sup>");
-                  }
-                  label.setText("<html>= " + html );
-               } 
+                  count.replace("  ", " ");
+                  label.setText("<html>= " + count + "<html>");
+               }
                catch (NumberFormatException ae) {
                   label.setText("Invalid");
                   count = "";
                }
             }
          };
-      ActionListener exponentAndLogarithm = 
-         new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               try {
-                  count += " ^ ";
-                  count.replaceAll("  ", " ");
-                  label.setText("= " + count );
-               } 
-               catch (NumberFormatException ae) {
-                  label.setText("Invalid");
-                  count = "";
-               }
-            }
-         };
+         
       ActionListener equalsListener = 
          new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -189,7 +178,7 @@ public class GUI {
       divide.addActionListener(operator);
       add.addActionListener(operator);
       subtract.addActionListener(operator);
-      exponent.addActionListener(exponentAndLogarithm);
+      exponent.addActionListener(operator);
       leftParenthesis.addActionListener(operator);
       rightParenthesis.addActionListener(operator);
       equals.addActionListener(equalsListener);
@@ -229,45 +218,51 @@ public class GUI {
       else if (e.getSource() == subtract) {
          count += " - ";
       }
+      else if (e.getSource() == exponent) {
+         count += " <sup> _ </sup> ";
+      }
       else if (e.getSource() == clear) {
          count = "";
       }
    }
    
-   public void identifyNumber(ActionEvent e) {
+   public String identifyNumber(ActionEvent e) {
    
       if (e.getSource() == zero) {
-         count += "0";
+         return "0";
       }
       else if (e.getSource() == one) {
-         count += "1";
+         return "1";
       }
       else if (e.getSource() == two) {
-         count += "2";
+         return "2";
       }
       else if (e.getSource() == three) {
-         count += "3";
+         return "3";
       }
       else if (e.getSource() == four) {
-         count += "4";
+         return "4";
       }
       else if (e.getSource() == five) {
-         count += "5";
+         return "5";
       }
       else if (e.getSource() == six) {
-         count += "6";
+         return "6";
       }
       else if (e.getSource() == seven) {
-         count += "7";
+         return "7";
       }
       else if (e.getSource() == eight) {
-         count += "8";
+         return "8";
       }
       else if (e.getSource() == nine) {
-         count += "9";
+         return "9";
       } 
       else if (e.getSource() == decimal) {
-         count += ".";
+         return ".";
+      }
+      else {
+         return "";
       }
    }
 }
