@@ -29,8 +29,8 @@ public class GUI {
    private JButton zero, one, two, three, four, five,
                    six, seven, eight, nine, decimal, 
                    multiply, divide, subtract, add, 
-                   exponent, leftParenth, rightParenthesis,
-                   leftParenthesis, equals, clear;
+                   exponent, logarithm, leftParenth, rightParenthesis,
+                   leftParenthesis, leftArrow, rightArrow, equals, clear;
    
    public GUI() {
    
@@ -53,8 +53,11 @@ public class GUI {
       add = new JButton("+");
       subtract = new JButton("-");
       exponent = new JButton("^");
+      logarithm = new JButton("log");
       leftParenthesis = new JButton("(");
       rightParenthesis = new JButton(")");
+      leftArrow = new JButton("<-");
+      rightArrow = new JButton("->");
       equals = new JButton();
       clear = new JButton("C");
       
@@ -86,8 +89,11 @@ public class GUI {
       buttonPanel.add(add);
       buttonPanel.add(subtract);
       buttonPanel.add(exponent);
+      buttonPanel.add(logarithm);
       buttonPanel.add(leftParenthesis);
       buttonPanel.add(rightParenthesis);
+      buttonPanel.add(leftArrow);
+      buttonPanel.add(rightArrow);
       buttonPanel.add(equals);
       buttonPanel.add(clear);
       labelPanel.add(label);
@@ -116,17 +122,15 @@ public class GUI {
       ActionListener number = 
          new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                 if (count.contains("_")) {
-                     String s = identifyNumber(e);
-                     char c = s.charAt(0);
-                     count = count.replace('_', c);
-                     label.setText("<html>= " + count + "<html>");
-                  }
-                  else {
+               if (count.contains("_")) {
+                  count = count.replace("_", identifyNumber(e) + "_");
+                  label.setText("<html>= " + count + "<html>");
+               }
+               else {
                   count += identifyNumber(e);
                   label.setText("<html>= " + count + "<html>");
                   count.replaceAll("  ", " ");
-                  }
+               }
             }
          };
       
@@ -144,11 +148,23 @@ public class GUI {
                }
             }
          };
+      
+      ActionListener arrowListener = 
+         new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                  // CONCEPT FOR WORKING ARROWS: change everything to input at location of whitespace
+                  // arrows would change location of white space by inserting whitespace with subStrings
+                  if (count.contains("_")) {
+                  count = count.replace("_", "");
+                  label.setText("<html>= " + count + "<html>");
+                  }
+            }
+         };
          
       ActionListener equalsListener = 
          new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               Calculations Calculator = new Calculations(count); 
+               Calculations Calculator = new Calculations(count.replaceAll("  ", " ")); 
                count = Calculator.count;
                try {
                   if ((double)(int)Double.parseDouble(count) == Double.parseDouble(count)) {
@@ -179,8 +195,11 @@ public class GUI {
       add.addActionListener(operator);
       subtract.addActionListener(operator);
       exponent.addActionListener(operator);
+      logarithm.addActionListener(operator);
       leftParenthesis.addActionListener(operator);
       rightParenthesis.addActionListener(operator);
+      leftArrow.addActionListener(arrowListener);
+      rightArrow.addActionListener(arrowListener);
       equals.addActionListener(equalsListener);
       equals.addMouseListener(hover);
       clear.addActionListener(operator);
@@ -220,6 +239,9 @@ public class GUI {
       }
       else if (e.getSource() == exponent) {
          count += " <sup> _ </sup> ";
+      }
+      else if (e.getSource() == logarithm) {
+         count += " log <sub> _ </sub> ";
       }
       else if (e.getSource() == clear) {
          count = "";
